@@ -48,7 +48,7 @@ def decToBinList (decNumber):
     res = [0 for i in range (8)]
 
     for i in range (8):
-        res[7 - i] = decNumber % 2
+        res[-i] = decNumber % 2
 
         decNumber = decNumber // 2
 
