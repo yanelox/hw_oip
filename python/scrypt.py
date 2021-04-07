@@ -121,5 +121,5 @@ def lightUpPWM (ledNumber):
 # time.sleep (1)
 # runningPattern (5, 0)
 # time.sleep (1)
-lightUpPWM (3)
-GPIO.cleanup()
+# lightUpPWM (3)
+# GPIO.cleanup()
