@@ -1,6 +1,8 @@
 import scipy.io.wavfile as sci
 import wave
 
+#pyflexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 wave = wave.open("/home/kir/and another one/hw_oip/python/SOUND.wav")
 sound = sci.read("/home/kir/and another one/hw_oip/python/SOUND.wav")
 
