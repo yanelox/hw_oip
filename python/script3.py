@@ -23,12 +23,12 @@ time = getFloatValue()
 frequency = getFloatValue()
 samplingFrequency = getFloatValue()
 
-ndarray = np.arange (0, time, 1 / samplingFrequency)
+X = np.arange(0, time, 1 / samplingFrequency)
 
-Y = np.sin (ndarray)
+ndarray = list(map(int, 127.5 * (np.sin(2 * np.pi * X * frequency) + 1)))
 
-plt.figure (figsize = (13, 13))
+plt.figure(figsize = (13, 13))
 
-plt.plot (ndarray, Y)
+plt.plot(X, ndarray)
 
-plt.savefig ("/home/kir/and another one/hw_oip/python/graph.png")
+plt.savefig("/home/kir/and another one/hw_oip/python/graph.png")
