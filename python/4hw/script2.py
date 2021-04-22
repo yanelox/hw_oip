@@ -1,22 +1,31 @@
 import inglib as kl
+import RPi.GPIO as GPIO
+import time
 
 #pyflexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-pins = kl.start(1)
+kl.start()
 
-com = #порт компаратора
+pot = 17
+com = 4
 
-GPIO.setmode(com, GPIO.OUT)
+GPIO.setup(pot, GPIO.OUT)
+GPIO.setup(com, GPIO.IN)
 
 #pyflexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 val = 0
 prev_val = 0
+GPIO.output(pot, 1)
 
 while True:
     val = kl.simpleSearch (com)
 
     if val != prev_val:
         print("Digital value: ", val, "\nAnalog value: ", kl.getVoltage(val), " Vi\n")
-
+    
     prev_val = val
+    time.sleep(0.001)
+
+GPIO.output(pot, 0)
+kl.num2dac(0, 1)

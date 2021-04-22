@@ -1,22 +1,17 @@
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time 
 
-def start(mode):
+pins = [[24, 25, 8, 7, 12, 16, 20, 21], [10, 9, 11, 5, 6, 13, 19, 26]] #LED, DAC
+
+def start():
     GPIO.setmode (GPIO.BCM)
 
-    pins = 0
+    GPIO.setup (pins[0], GPIO.OUT)
+    GPIO.setup (pins[1], GPIO.OUT)
 
-    if mode == 0:
-        pins = [24, 25, 8, 7, 12, 16, 20, 21] #LED
-    elif mode == 1:
-        pins = [10, 9, 11, 5, 6, 13, 19, 26] #DAC
 
-    GPIO.setup (pins, GPIO.OUT)
-
-    return pins
-
-def lightUp (ledNumber, period):
-    pin = pins[ledNumber]
+def lightUp (ledNumber, period, i):
+    pin = pins[i][ledNumber]
 
     GPIO.output (pin, 1)
 
@@ -25,33 +20,33 @@ def lightUp (ledNumber, period):
     GPIO.output (pin, 0)
 
 
-def blink (ledNumber, blinkCount, blinkPeriod):
-    pin = pins[ledNumber]
+def blink (ledNumber, blinkCount, blinkPeriod, i):
+    pin = pins[i][ledNumber]
 
     for i in range (blinkCount):
-        lightUp (ledNumber, blinkPeriod)
+        lightUp (ledNumber, blinkPeriod, i)
 
         time.sleep (blinkPeriod)
 
     GPIO.output (pins, 0)
 
-def runningLight (count, period):
+def runningLight (count, period, i):
     for i in range (count):
         for j in range(8):
-            lightUp (j, period)
+            lightUp (j, period, i)
 
-def runningDark (count, period):
-    GPIO.output (pins, 1)
+def runningDark (count, period, k):
+    GPIO.output (pins[k], 1)
 
     for i in range (count):
         for j in range(8):
-            GPIO.output (pins[j], 0)
+            GPIO.output (pins[k][j], 0)
 
             time.sleep (period)
 
-            GPIO.output (pins[j], 1)
+            GPIO.output (pins[k][j], 1)
 
-    GPIO.output (pins, 0)
+    GPIO.output (pins[k], 0)
 
 
 def decToBinList (decNumber):
@@ -64,11 +59,11 @@ def decToBinList (decNumber):
 
     return res
 
-def lightNumber (number):
+def lightNumber (number, k):
     decNumber = decToBinList (number)
     decNumber = decNumber [::-1]
 
-    GPIO.output (pins, decNumber)
+    GPIO.output (pins[k], decNumber)
 
 
 def numberShift (number, direction):
@@ -90,10 +85,10 @@ def numberShift (number, direction):
 
     return res
 
-def runningPattern (pattern, direction):
+def runningPattern (pattern, direction, k):
     for i in range (9):
         print (decToBinList (pattern))
-        GPIO.output (pins, decToBinList(pattern)[::-1])
+        GPIO.output (pins[k], decToBinList(pattern)[::-1])
 
         time.sleep (1)
         
@@ -101,8 +96,8 @@ def runningPattern (pattern, direction):
 
     GPIO.output (pins, 0)
 
-def lightUpPWM (ledNumber):
-    p = GPIO.PWM (pins[ledNumber], 100)
+def lightUpPWM (ledNumber, k):
+    p = GPIO.PWM (pins[k][ledNumber], 100)
     p.start (0)
 
     for i in range (0, 100, 5):
@@ -115,8 +110,8 @@ def lightUpPWM (ledNumber):
 
     p.stop()
 
-def num2dac(value):
-    lightNumber(value)
+def num2dac(value, k):
+    lightNumber(value, k)
 
 def getValue():
     res = -42
@@ -142,32 +137,37 @@ def getVoltage(value):
 def simpleSearch(pin):
     val = 0
 
-    num2dac(0)
+    num2dac(0, 1)
 
-    while GPIO.input(pin) != 1 and val < 256:
-        val += 1
-        num2dac (val)
+    while GPIO.input(pin) == GPIO.HIGH and val < 256:
+        val = val + 1
+        num2dac (val, 1)
+        time.sleep(0.001)
+
+    num2dac(0, 1)
 
     return val
 
 def binSearch(pin):
-    max_val = 255
-    min_val = 0
+    r= 255
+    l = 0
 
-    val = max_val // 2
-
-    num2dac(val)
+    num2dac((l + r) // 2, 1)
+    time.sleep(0.001)
 
     for i in range(8):
-        if GPIO.input(pin) == 1:
-            val = (val + min_val) // 2
+        if GPIO.input(pin) == GPIO.LOW:
+            r = (l + r) // 2
 
         else:
-            val = (val + max_val) // 2
+            l = (l +  r) // 2
 
-        num2dac(val)
+        num2dac((l + r) // 2, 1)
+        time.sleep(0.001)
 
-    return val
+    num2dac(0, 1)
+
+    return (l + r) // 2
 
 def getLevel(value):
     res = 0
@@ -180,5 +180,5 @@ def getLevel(value):
 
     return res
 
-def setLevel(value):
-    lightNumber (getLevel(value))
+def setLevel(value, k):
+    lightNumber (getLevel(value), k)

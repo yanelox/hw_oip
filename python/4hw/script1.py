@@ -1,18 +1,29 @@
 import inglib as kl
+import RPi.GPIO as GPIO
 
 #pyflexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-pins = kl.start(1)
+kl.start()
+
+com = 17
+GPIO.setup(com, GPIO.OUT)
 
 #pyflexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 val = 0
+GPIO.output(com, 1)
 
 while val != -1:
-    print ("Enter value(-1 toe exit):\n")
+    print ("Enter value(-1 to exit):\n")
 
     val = kl.getValue()
 
-    kl.num2dac(val)
+    if val == -1:
+        break
 
-    print(val, " = ", kl.getVoltage(val), " V\n")
+    kl.num2dac(val, 1)
+
+    print(val, "=", kl.getVoltage(val), "V\n")
+
+GPIO.output(com, 0)
+kl.num2dac(0, 1)
