@@ -1,9 +1,19 @@
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import time 
 
-GPIO.setmode (GPIO.BCM)
-pins = [24, 25, 8, 7, 12, 16, 20, 21]
-GPIO.setup (pins, GPIO.OUT)
+def start(mode):
+    GPIO.setmode (GPIO.BCM)
+
+    pins = 0
+
+    if mode == 0:
+        pins = [24, 25, 8, 7, 12, 16, 20, 21] #LED
+    elif mode == 1:
+        pins = [10, 9, 11, 5, 6, 13, 19, 26] #DAC
+
+    GPIO.setup (pins, GPIO.OUT)
+
+    return pins
 
 def lightUp (ledNumber, period):
     pin = pins[ledNumber]
@@ -60,9 +70,6 @@ def lightNumber (number):
 
     GPIO.output (pins, decNumber)
 
-    time.sleep (1)
-
-    GPIO.output (pins, 0)
 
 def numberShift (number, direction):
     res= 0
@@ -108,18 +115,70 @@ def lightUpPWM (ledNumber):
 
     p.stop()
 
-# lightUp (4, 2)
-# time.sleep (1)
-# blink (2, 3, 1)
-# time.sleep (1)
-# runningLight (2, 0.2)
-# time.sleep (1)
-# runningDark (2, 0.2)
-# time.sleep (1)
-# print (decToBinList (3))
-# lightNumber (3)
-# time.sleep (1)
-# runningPattern (5, 0)
-# time.sleep (1)
-# lightUpPWM (3)
-# GPIO.cleanup()
+def num2dac(value):
+    lightNumber(value)
+
+def getValue():
+    res = -42
+    
+    while res < -1:
+        try:
+            res = int(input())
+
+            if res < -1:
+                print("Incorrect input")
+        
+        except:
+            print("Incorrect input")
+
+    return res
+
+def getVoltage(value):
+    max_voltage = 3.3
+    max_value = 255
+
+    return value / max_value * max_voltage
+
+def simpleSearch(pin):
+    val = 0
+
+    num2dac(0)
+
+    while GPIO.input(pin) != 1 and val < 256:
+        val += 1
+        num2dac (val)
+
+    return val
+
+def binSearch(pin):
+    max_val = 255
+    min_val = 0
+
+    val = max_val // 2
+
+    num2dac(val)
+
+    for i in range(8):
+        if GPIO.input(pin) == 1:
+            val = (val + min_val) // 2
+
+        else:
+            val = (val + max_val) // 2
+
+        num2dac(val)
+
+    return val
+
+def getLevel(value):
+    res = 0
+    interval = 255 // 9 + 1
+
+    tmp = value // interval
+
+    for i in range(tmp):
+        res += 2 ** (7 - i)
+
+    return res
+
+def setLevel(value):
+    lightNumber (getLevel(value))
